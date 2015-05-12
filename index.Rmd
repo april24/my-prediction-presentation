@@ -1,0 +1,83 @@
+---
+title       : Prediction with Galton's Data
+subtitle    : Linear Regression Model
+author      : RongChen
+job         : 
+framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
+highlighter : highlight.js  # {highlight.js, prettify, highlight}
+hitheme     : tomorrow      # 
+widgets     : [mathjax]      # {mathjax, quiz, bootstrap}
+mode        : selfcontained # {standalone, draft}
+knit        : slidify::knit2slides
+---
+
+## Galton'Data
+There are two questions we trying to answer:
+
+
+1.To try to find a parsimonious, easily described relationship between parent and children's heights.
+
+2.To use the parents' heights to predict children's heights.
+
+```{r,echo=FALSE}    
+library(UsingR); data(galton)
+par(mfrow=c(1,2), mar = c(4, 4, 2, 1),oma = c(15, 0, 0, 0))
+hist(galton$child,col="blue",breaks=100,xlab = "child",main="")
+hist(galton$parent,col="blue",breaks=100,xlab = "parent",main="")
+```
+
+--- .class #id 
+
+## The solution of the best fit model
+Let $Y_i$ be the $i_th$ child's height and $X_i$ be the $i_th$ parents' heights.
+
+Consider finding the best line: $Child's Height = \beta_0+ Parent's Height*\beta_1$
+
+Our goal is to minimize the least squares: $$\sum_{i=1}^n \{Y_i-(\beta_0+\beta_1X_i)\}^2$$
+
+R can help us find the best fit model
+```{r}  
+fit<-lm(child~parent,data=galton)
+```
+
+
+--- .class #id 
+
+## Visualizing the best fit line 
+
+```{r,echo=FALSE}  
+freqData <-as.data.frame(table(galton$parent, galton$child))
+names(freqData) <- c("child", "parent", "freq")
+plot(as.numeric(as.vector(freqData$parent)),
+     as.numeric(as.vector(freqData$child)),
+     pch = 21, col = "black", bg = "lightblue",
+     cex = .15 * freqData$freq,
+     xlab = "parent",ylab = "child")
+abline(coef(fit)[1],coef(fit)[2],lwd = 3)
+mse <- mean((galton$child-galton$parent*coef(fit)[2]-coef(fit)[1])^2)
+title(paste("intercept =",round(coef(fit)[1],3),
+            "slope=",round(coef(fit)[2],3),
+            "mse = ", round(mse, 3)))
+```
+
+
+--- .class #id 
+
+##  Prediction and My Shiny Application
+
+
+Finally, Here is my application on Rstudio's shiny server
+https://april.shinyapps.io/prediction/
+
+Everyone can use it to understand how linear regression model works and predicte childrens' heights via parents' heights.The function I use to predict is as follows:
+```{r} 
+bestfit<-function(parent_height) {
+    fit<-lm(child~parent,data=galton)
+    coef(fit)[1]+coef(fit)[2]*parent_height
+}
+```
+
+
+
+
+
